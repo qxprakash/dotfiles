@@ -1,0 +1,43 @@
+# Theme (inlined for cmux compatibility)
+background = #0D1116
+foreground = #ffffff
+cursor-color = #f94dff
+palette = 0=#0D1116
+palette = 8=#e58f2a
+palette = 1=#f16c75
+palette = 9=#f16c75
+palette = 2=#37f499
+palette = 10=#37f499
+palette = 3=#9ad900
+palette = 11=#9ad900
+palette = 4=#987afb
+palette = 12=#987afb
+palette = 5=#fca6ff
+palette = 13=#fca6ff
+palette = 6=#04d1f9
+palette = 14=#04d1f9
+palette = 7=#ffffff
+palette = 15=#ffffff
+
+window-padding-x = 4,2
+window-padding-y = 6,0
+
+font-family = "JetBrainsMono Nerd Font"
+font-size = 15
+
+macos-titlebar-style = hidden
+confirm-close-surface = false
+
+keybind = cmd+s=toggle_quick_terminal
+keybind = super+i=inspector:toggle
+keybind = super+r=reload_config
+
+macos-option-as-alt = right
+
+quick-terminal-animation-duration = 0.08
+
+macos-icon = official
+
+background-opacity = 0.78
+background-blur = true
+unfocused-split-opacity = 0.7

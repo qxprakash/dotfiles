@@ -1,0 +1,85 @@
+@charset "UTF-8";
+
+/* ── Auto-hide navigation bar ────────────────────────────────────── */
+/* visibility:collapse is the XUL-native way to fully remove from layout */
+#nav-bar {
+  visibility: collapse !important;
+}
+
+#navigator-toolbox:not(:hover) {
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+#navigator-toolbox:hover > #nav-bar,
+#nav-bar:focus-within,
+#nav-bar:has([open]) {
+  visibility: visible !important;
+  min-height: 40px !important;
+}
+
+/* ── Hide bookmarks toolbar ───────────────────────────────────────── */
+#PersonalToolbar {
+  display: none !important;
+}
+
+/* ── Hide Floorp Browser Manager Sidebar — explicit IDs only ─────── */
+#sidebar-box,
+#sidebar-splitter,
+#sidebar-select-box,
+#sidebar-header,
+#sidebar2-box,
+#sidebar-splitter2,
+#browser-border-end,
+#browser-border-start,
+#panel-sidebar,
+#webpanel-box,
+#statusbar-display,
+#floorp-bms-sidebar,
+#bms-sidebar-panel,
+#sidebar-reverse-position-toolbar,
+#sidebar-back-button,
+#verticaltab-splitter,
+#panel-sidebar-display-browser-panel,
+#toolbox-panel-sidebar,
+#sidebar-main,
+#sidebar-switcher-target,
+#sidebar-throbber,
+#browser-manager-sidebar,
+#bms-sidebar,
+#bms-sidebar-selectbox,
+#bms-header,
+#bms-sidebar-container {
+  display: none !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+}
+
+
+/* ── Clean up tab bar ─────────────────────────────────────────────── */
+#TabsToolbar {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.titlebar-spacer {
+  display: none !important;
+}
+
+/* ── Hide Floorp workspace button ─────────────────────────────────── */
+#workspace-button,
+#workspaces-toolbar-button {
+  display: none !important;
+}
+
+/* ── Hide macOS traffic lights and window controls ────────────────── */
+.titlebar-buttonbox-container,
+.titlebar-buttonbox,
+.titlebar-button,
+.titlebar-close,
+.titlebar-min,
+.titlebar-max,
+.titlebar-restore {
+  display: none !important;
+}

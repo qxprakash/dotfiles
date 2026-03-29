@@ -1,0 +1,208 @@
+# i3-like AeroSpace config with multi-monitor setup
+# Reference: https://github.com/i3/i3/blob/next/etc/config
+config-version = 2
+
+# ── Startup ──────────────────────────────────────────────────────────
+start-at-login = true
+
+after-startup-command = [
+    'exec-and-forget sketchybar',
+    'exec-and-forget borders active_color=0xff00ff00 inactive_color=0xff555555 width=8.0',
+    'exec-and-forget ~/.config/sketchybar/plugins/media_stream.sh'
+]
+
+# i3 doesn't have "normalizations" — disabled for i3 parity
+enable-normalization-flatten-containers = false
+enable-normalization-opposite-orientation-for-nested-containers = false
+
+# In i3, all workspaces are phantom (created on demand)
+persistent-workspaces = []
+
+# ── Layout defaults ──────────────────────────────────────────────────
+default-root-container-layout = 'tiles'
+default-root-container-orientation = 'auto'
+accordion-padding = 30
+
+# ── Mouse follows focus (i3 default) ────────────────────────────────
+on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
+on-focus-changed = ['move-mouse window-lazy-center']
+
+# ── SketchyBar integration ───────────────────────────────────────────
+exec-on-workspace-change = ['/bin/bash', '-c',
+    'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE'
+]
+
+# ── Gaps (none) ──────────────────────────────────────────────────────
+[gaps]
+    inner.horizontal = [{ monitor.built-in = 8 }, 16]
+    inner.vertical   = [{ monitor.built-in = 8 }, 16]
+    outer.left       = [{ monitor.built-in = 8 }, 16]
+    outer.bottom     = [{ monitor.built-in = 8 }, 16]
+    outer.top        = [{ monitor.built-in = 8 }, 36]
+    outer.right      = [{ monitor.built-in = 8 }, 16]
+
+# ── Workspace-to-Monitor Assignment ─────────────────────────────────
+# Left   (built-in laptop):         Workspaces 1-2
+# Center (main display, S22C31x 2): Workspaces 3-5
+# Right  (portrait, S22C31x 1):     Workspaces 6-9
+[workspace-to-monitor-force-assignment]
+    1 = 'built-in'
+    2 = 'built-in'
+    3 = 'main'
+    4 = 'main'
+    5 = 'main'
+    6 = 'S22C31x \(1\)'
+    7 = 'S22C31x \(1\)'
+    8 = 'S22C31x \(1\)'
+    9 = 'S22C31x \(1\)'
+
+# ── App-to-Workspace Rules ──────────────────────────────────────────
+# Terminal → Built-in laptop (workspace 1)
+[[on-window-detected]]
+    if.app-id = 'com.apple.Terminal'
+    run = 'move-node-to-workspace 1'
+
+[[on-window-detected]]
+    if.app-id = 'com.googlecode.iterm2'
+    run = 'move-node-to-workspace 1'
+
+[[on-window-detected]]
+    if.app-id = 'org.alacritty'
+    run = 'move-node-to-workspace 1'
+
+[[on-window-detected]]
+    if.app-id = 'dev.warp.Warp-Stable'
+    run = 'move-node-to-workspace 1'
+
+[[on-window-detected]]
+    if.app-id = 'com.mitchellh.ghostty'
+    run = 'move-node-to-workspace 1'
+
+# Browser → Main monitor (workspace 3)
+[[on-window-detected]]
+    if.app-id = 'com.apple.Safari'
+    run = 'move-node-to-workspace 3'
+
+[[on-window-detected]]
+    if.app-id = 'com.google.Chrome'
+    run = 'move-node-to-workspace 3'
+
+[[on-window-detected]]
+    if.app-id = 'org.mozilla.firefox'
+    run = 'move-node-to-workspace 3'
+
+[[on-window-detected]]
+    if.app-id = 'company.thebrowser.Browser'
+    run = 'move-node-to-workspace 3'
+
+# Chat → Portrait monitor (workspace 6)
+[[on-window-detected]]
+    if.app-id = 'com.tinyspeck.slackmacgap'
+    run = 'move-node-to-workspace 6'
+
+[[on-window-detected]]
+    if.app-id = 'com.hnc.Discord'
+    run = 'move-node-to-workspace 6'
+
+# ── Key Mapping ──────────────────────────────────────────────────────
+[key-mapping]
+    preset = 'qwerty'
+
+# ── Main Bindings (i3-style) ─────────────────────────────────────────
+[mode.main.binding]
+
+    # Open terminal (i3: $mod+Return)
+    alt-enter = '''exec-and-forget osascript -e '
+    tell application "Terminal"
+        do script
+        activate
+    end tell'
+    '''
+
+    # ── Focus (i3 wraps by default) ──────────────────────────────────
+    alt-j         = 'focus --boundaries-action wrap-around-the-workspace left'
+    alt-k         = 'focus --boundaries-action wrap-around-the-workspace down'
+    alt-l         = 'focus --boundaries-action wrap-around-the-workspace up'
+    alt-semicolon = 'focus --boundaries-action wrap-around-the-workspace right'
+
+    # ── Move windows ─────────────────────────────────────────────────
+    alt-shift-j         = 'move left'
+    alt-shift-k         = 'move down'
+    alt-shift-l         = 'move up'
+    alt-shift-semicolon = 'move right'
+
+    # ── Split (i3: $mod+h horizontal, $mod+v vertical) ───────────────
+    alt-h = 'split horizontal'
+    alt-v = 'split vertical'
+
+    # ── Fullscreen ───────────────────────────────────────────────────
+    alt-f = 'fullscreen'
+
+    # ── Layout (i3-style) ────────────────────────────────────────────
+    alt-shift-s = 'layout v_accordion'                    # i3: layout stacking
+    alt-shift-w = 'layout h_accordion'                    # i3: layout tabbed
+    alt-shift-e = 'layout tiles horizontal vertical'      # i3: layout toggle split
+
+    # ── Float toggle ─────────────────────────────────────────────────
+    alt-shift-space = 'layout floating tiling'
+
+    # ── Focus monitor (cross-monitor navigation) ─────────────────────
+    alt-ctrl-h = 'focus-monitor left'
+    alt-ctrl-l = 'focus-monitor right'
+    alt-ctrl-j = 'focus-monitor down'
+    alt-ctrl-k = 'focus-monitor up'
+    alt-ctrl-right = 'focus-monitor --wrap-around next'
+    alt-ctrl-left  = 'focus-monitor --wrap-around prev'
+
+    # ── Move window to monitor ───────────────────────────────────────
+    alt-ctrl-shift-h = 'move-node-to-monitor left'
+    alt-ctrl-shift-l = 'move-node-to-monitor right'
+    alt-ctrl-shift-j = 'move-node-to-monitor down'
+    alt-ctrl-shift-k = 'move-node-to-monitor up'
+    alt-shift-right   = 'move-node-to-monitor --wrap-around next'
+    alt-shift-left    = 'move-node-to-monitor --wrap-around prev'
+
+    # ── Move workspace to monitor ────────────────────────────────────
+    alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
+
+    # ── Switch workspaces ────────────────────────────────────────────
+    alt-1 = 'workspace 1'
+    alt-2 = 'workspace 2'
+    alt-3 = 'workspace 3'
+    alt-4 = 'workspace 4'
+    alt-5 = 'workspace 5'
+    alt-6 = 'workspace 6'
+    alt-7 = 'workspace 7'
+    alt-8 = 'workspace 8'
+    alt-9 = 'workspace 9'
+    alt-0 = 'workspace 10'
+
+    # ── Move window to workspace ─────────────────────────────────────
+    alt-shift-1 = 'move-node-to-workspace 1'
+    alt-shift-2 = 'move-node-to-workspace 2'
+    alt-shift-3 = 'move-node-to-workspace 3'
+    alt-shift-4 = 'move-node-to-workspace 4'
+    alt-shift-5 = 'move-node-to-workspace 5'
+    alt-shift-6 = 'move-node-to-workspace 6'
+    alt-shift-7 = 'move-node-to-workspace 7'
+    alt-shift-8 = 'move-node-to-workspace 8'
+    alt-shift-9 = 'move-node-to-workspace 9'
+    alt-shift-0 = 'move-node-to-workspace 10'
+
+    # ── Quick toggle ─────────────────────────────────────────────────
+    alt-tab = 'workspace-back-and-forth'
+
+    # ── Reload config (i3: $mod+Shift+c) ─────────────────────────────
+    alt-shift-c = 'reload-config'
+
+    # ── Resize mode (i3: $mod+r) ─────────────────────────────────────
+    alt-r = 'mode resize'
+
+# ── Resize Mode (i3-style) ───────────────────────────────────────────
+[mode.resize.binding]
+    h     = 'resize width -50'
+    j     = 'resize height +50'
+    k     = 'resize height -50'
+    l     = 'resize width +50'
+    enter = 'mode main'
+    esc   = 'mode main'

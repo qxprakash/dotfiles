@@ -1,0 +1,289 @@
+#!/bin/bash
+
+# Kill any existing media stream processes
+pkill -f media_stream.sh 2>/dev/null
+pkill -f "media-control stream" 2>/dev/null
+
+PLUGIN_DIR="$CONFIG_DIR/plugins"
+FONT="FiraCode Nerd Font"
+
+# ── Nord Color Scheme ────────────────────────────────────────────────
+BAR_BG=0xff2E3440        # Nord0 - Polar Night
+ITEM_BG=0xff3B4252       # Nord1
+WHITE=0xffECEFF4         # Nord6
+GREEN=0xffA3BE8C         # Nord14
+RED=0xffBF616A           # Nord11
+ORANGE=0xffD08770        # Nord12
+BLUE=0xff5E81AC          # Nord10
+YELLOW=0xffEBCB8B        # Nord13
+FROST=0xff81A1C1         # Nord9
+PURPLE=0xffB48EAD        # Nord15
+HIGHLIGHT=0xffD8DEE9     # Nord4
+BLACK=0xff000000          # Pure black
+
+# ── Bar Appearance ───────────────────────────────────────────────────
+sketchybar --bar height=28 \
+                 blur_radius=30 \
+                 position=top \
+                 padding_left=5 \
+                 padding_right=5 \
+                 margin=0 \
+                 corner_radius=0 \
+                 color=0x40000000 \
+                 border_width=0 \
+                 border_color=0x40000000
+
+# ── Defaults ─────────────────────────────────────────────────────────
+sketchybar --default updates=when_shown \
+                     drawing=on \
+                     cache_scripts=on \
+                     icon.font="$FONT:Bold:12.0" \
+                     icon.color=$WHITE \
+                     icon.highlight_color=$GREEN \
+                     label.font="$FONT:Regular:11.0" \
+                     label.color=$WHITE \
+                     label.padding_left=2 \
+                     label.padding_right=2 \
+                     icon.padding_left=6 \
+                     icon.padding_right=4
+
+# ══════════════════════════════════════════════════════════════════════
+# LEFT SIDE
+# ══════════════════════════════════════════════════════════════════════
+
+# ── AeroSpace Workspace Indicators ──────────────────────────────────
+sketchybar --add event aerospace_workspace_change
+
+# Workspace-to-display mapping
+# WS 1-2 → built-in (laptop), WS 3-5 → main external, WS 6-9 → portrait external
+# Display IDs are assigned AFTER aerospace is ready (background process below)
+WORKSPACES=("1" "2" "3" "4" "5" "6" "7" "8" "9")
+
+for i in "${!WORKSPACES[@]}"
+do
+  sid="${WORKSPACES[i]}"
+
+  # Add thin separator between workspaces (not before first)
+  if [ "$i" -gt 0 ]; then
+    sketchybar --add item sep.$sid left \
+               --set sep.$sid icon="|" \
+                              icon.font="$FONT:Regular:12.0" \
+                              icon.color=0x40ffffff \
+                              icon.padding_left=2 \
+                              icon.padding_right=2 \
+                              label.drawing=off \
+                              background.drawing=off
+  fi
+
+  sketchybar --add item space.$sid left \
+             --subscribe space.$sid aerospace_workspace_change front_app_switched mouse.entered mouse.exited \
+             --set space.$sid \
+                 icon.drawing=off \
+                 label.font="sketchybar-app-font:Regular:14.0" \
+                 label.padding_left=6 \
+                 label.padding_right=6 \
+                 label.y_offset=1 \
+                 background.color=$HIGHLIGHT \
+                 background.drawing=off \
+                 background.height=22 \
+                 background.corner_radius=4 \
+                 script="$PLUGIN_DIR/aerospace.sh" \
+                 click_script="aerospace workspace $sid"
+done
+
+# ── Deferred display assignment (waits for aerospace) ──────────────────
+# At boot, aerospace may not be ready when sketchybar starts.
+# This background process retries until aerospace responds, then pins
+# each workspace indicator to the correct monitor.
+(
+  # Wait up to 30 seconds for aerospace to be ready
+  for attempt in $(seq 1 30); do
+    MONITOR_COUNT=$(aerospace list-monitors 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$MONITOR_COUNT" -ge 3 ]; then
+      break
+    fi
+    sleep 1
+  done
+
+  if [ "$MONITOR_COUNT" -ge 3 ]; then
+    # Map workspace → display using aerospace's monitor IDs
+    # aerospace list-monitors: 1=Built-in, 2=S22C31x(2)/main, 3=S22C31x(1)/portrait
+    DISPLAYS=(3 3 1 1 1 2 2 2 2)
+    WS_IDS=( 1 2 3 4 5 6 7 8 9)
+    for idx in "${!WS_IDS[@]}"; do
+      sid="${WS_IDS[idx]}"
+      did="${DISPLAYS[idx]}"
+      sketchybar --set space.$sid display=$did
+      sketchybar --set sep.$sid display=$did 2>/dev/null
+    done
+  fi
+) &
+
+# Highlight initially focused workspace
+FOCUSED=$(aerospace list-workspaces --focused 2>/dev/null || echo "1")
+sketchybar --set space."$FOCUSED" background.drawing=on icon.highlight=on
+
+# ── Chevron Separator ────────────────────────────────────────────────
+sketchybar --add item chevron left \
+           --set chevron icon=❯ \
+                         icon.font="$FONT:Bold:12.0" \
+                         icon.color=$HIGHLIGHT \
+                         label.drawing=off \
+                         icon.padding_left=4 \
+                         icon.padding_right=4
+
+# ── Front App ────────────────────────────────────────────────────────
+sketchybar --add item front_app left \
+           --set front_app icon.font="sketchybar-app-font:Regular:14.0" \
+                           icon.y_offset=1 \
+                           icon.padding_right=6 \
+                           icon.color=$BLACK \
+                           label.font="$FONT:Bold:11.0" \
+                           label.color=$BLACK \
+                           label.padding_right=6 \
+                           background.color=$FROST \
+                           background.height=22 \
+                           background.corner_radius=4 \
+                           background.padding_left=5 \
+                           script="$PLUGIN_DIR/front_app.sh" \
+           --subscribe front_app front_app_switched
+
+# ══════════════════════════════════════════════════════════════════════
+# CENTER - Now Playing
+# ══════════════════════════════════════════════════════════════════════
+
+sketchybar --add item media center \
+           --set media icon="󰎈" \
+                       icon.font="$FONT:Bold:13.0" \
+                       icon.color=$BLACK \
+                       icon.padding_right=4 \
+                       label.font="$FONT:Regular:11.0" \
+                       label.color=$BLACK \
+                       label.max_chars=50 \
+                       label.padding_right=6 \
+                       drawing=off \
+                       background.color=$GREEN \
+                       background.height=22 \
+                       background.corner_radius=4 \
+                       background.padding_left=5 \
+                       click_script="media-control toggle-play-pause"
+
+# Media stream launched via aerospace after-startup-command
+
+# ══════════════════════════════════════════════════════════════════════
+# RIGHT SIDE (right-to-left order)
+# ══════════════════════════════════════════════════════════════════════
+
+# ── Battery ──────────────────────────────────────────────────────────
+sketchybar --add item battery right \
+           --set battery icon="" \
+                         icon.font="$FONT:Bold:12.0" \
+                         icon.color=$BLACK \
+                         label.font="$FONT:Bold:11.0" \
+                         label.color=$BLACK \
+                         update_freq=3 \
+                         script="$PLUGIN_DIR/power.sh" \
+                         background.color=$PURPLE \
+                         background.height=22 \
+                         background.corner_radius=4 \
+                         background.padding_left=5
+
+# ── Clock ────────────────────────────────────────────────────────────
+sketchybar --add item clock right \
+           --set clock icon="" \
+                       icon.font="$FONT:Bold:12.0" \
+                       icon.color=$BLACK \
+                       label.font="$FONT:Bold:11.0" \
+                       label.color=$BLACK \
+                       update_freq=1 \
+                       script="$PLUGIN_DIR/clock.sh" \
+                       background.color=$BLUE \
+                       background.height=22 \
+                       background.corner_radius=4 \
+                       background.padding_left=5
+
+# ── Volume ───────────────────────────────────────────────────────────
+sketchybar --add item volume right \
+           --set volume icon="" \
+                        icon.font="$FONT:Bold:12.0" \
+                        icon.color=$BLACK \
+                        label.font="$FONT:Bold:11.0" \
+                        label.color=$BLACK \
+                        script="$PLUGIN_DIR/volume.sh" \
+                        update_freq=1 \
+                        background.color=$FROST \
+                        background.height=22 \
+                        background.corner_radius=4 \
+                        background.padding_left=5
+
+# ── WiFi Icon ────────────────────────────────────────────────────────
+sketchybar --add item net_logo right \
+           --set net_logo icon="" \
+                     icon.color=$BLACK \
+                     background.color=$PURPLE \
+                     background.height=22 \
+                     background.corner_radius=4 \
+                     background.padding_left=5
+
+# ── RAM Usage ────────────────────────────────────────────────────────
+sketchybar --add item ram right \
+           --set ram icon="" \
+                     icon.font="$FONT:Bold:14.0" \
+                     icon.color=$BLACK \
+                     label.font="$FONT:Bold:11.0" \
+                     label.color=$BLACK \
+                     update_freq=2 \
+                     script="$PLUGIN_DIR/ram.sh" \
+                     background.color=$GREEN \
+                     background.height=22 \
+                     background.corner_radius=4 \
+                     background.padding_left=5
+
+# ── CPU Usage ────────────────────────────────────────────────────────
+sketchybar --add item cpu right \
+           --set cpu icon="󰍛" \
+                     icon.font="$FONT:Bold:14.0" \
+                     icon.color=$BLACK \
+                     label.font="$FONT:Bold:11.0" \
+                     label.color=$BLACK \
+                     update_freq=2 \
+                     script="$PLUGIN_DIR/cpu.sh" \
+                     background.color=$YELLOW \
+                     background.height=22 \
+                     background.corner_radius=4 \
+                     background.padding_left=5
+
+# ── Network Speed ────────────────────────────────────────────────────
+sketchybar --add item network right \
+           --set network icon="" \
+                         icon.font="$FONT:Bold:11.0" \
+                         icon.color=$BLACK \
+                         label.font="$FONT:Bold:11.0" \
+                         label.color=$BLACK \
+                         update_freq=2 \
+                         script="$PLUGIN_DIR/network.sh" \
+                         background.color=$ORANGE \
+                         background.height=22 \
+                         background.corner_radius=4 \
+                         background.padding_left=5
+
+# ══════════════════════════════════════════════════════════════════════
+# BRACKETS (visual grouping)
+# ══════════════════════════════════════════════════════════════════════
+
+sketchybar --add bracket primary_spaces space.1 \
+                                        space.2 \
+                                        space.3 \
+                                        space.4 \
+                                        space.5 \
+                                        space.6 \
+                                        space.7 \
+                                        space.8 \
+                                        space.9 \
+           --set primary_spaces background.color=$ITEM_BG \
+                                background.corner_radius=4 \
+                                background.height=22
+
+# ── Force initial update ─────────────────────────────────────────────
+sketchybar --update
+echo "sketchybar configuration loaded..."

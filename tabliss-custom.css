@@ -1,0 +1,220 @@
+/* ══════════════════════════════════════════════════════
+   GitHub Calendar fix
+   ══════════════════════════════════════════════════════ */
+.sr-only {
+    display: none;
+}
+
+td:first-child {
+    display: none;
+}
+
+div.js-calendar-graph div:last-child {
+    display: none;
+}
+
+table.ContributionCalendar-grid thead {
+    display: none;
+}
+
+td.ContributionCalendar-day[data-level='0'] {
+    background-color: var(--color-calendar-graph-day-bg);
+}
+
+td.ContributionCalendar-day[data-level='1'] {
+    background-color: var(--color-calendar-graph-day-L1-bg);
+}
+
+td.ContributionCalendar-day[data-level='2'] {
+    background-color: var(--color-calendar-graph-day-L2-bg);
+}
+
+td.ContributionCalendar-day[data-level='3'] {
+    background-color: var(--color-calendar-graph-day-L3-bg);
+}
+
+td.ContributionCalendar-day[data-level='4'] {
+    background-color: var(--color-calendar-graph-day-L4-bg);
+}
+
+/* ══════════════════════════════════════════════════════
+   Two-column layout: portrait left, content right
+   ══════════════════════════════════════════════════════ */
+.Dashboard .Widgets {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 50px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 80px;
+    min-height: 100vh;
+    font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+    position: relative;
+    z-index: 1;
+}
+
+/* ══════════════════════════════════════════════════════
+   Portrait image (left side)
+   REPLACE the URL below with your hosted image
+   ══════════════════════════════════════════════════════ */
+.Dashboard .Widgets::before {
+    content: '';
+    width: 280px;
+    height: 380px;
+    flex-shrink: 0;
+    background-image: url('https://i.pinimg.com/736x/53/f0/43/53f043b48c295fa9bb6baaa52db075c2.jpg');
+    background-size: cover;
+    background-position: center;
+    border: 1px solid rgba(150, 160, 200, 0.2);
+    box-shadow:
+        6px 6px 0 rgba(100, 120, 180, 0.1),
+        -2px -2px 0 rgba(100, 120, 180, 0.05);
+    transform: rotate(-1deg);
+    order: 0;
+    margin-right: 90px;
+    position: relative;
+    left: -60px;
+}
+
+/* ══════════════════════════════════════════════════════
+   Right column: all widgets stack vertically
+   ══════════════════════════════════════════════════════ */
+.Dashboard .Widgets>* {
+    width: 500px;
+    flex-shrink: 0;
+}
+
+/* Explicit order for each widget */
+.Dashboard .Time {
+    order: 1;
+}
+
+.Dashboard .Greeting {
+    order: 2;
+    display: none;
+}
+
+.Dashboard .Search {
+    order: 3;
+}
+
+.Dashboard .GitHub {
+    order: 4;
+}
+
+/* ══════════════════════════════════════════════════════
+   Time: monospace with echo effect
+   ══════════════════════════════════════════════════════ */
+.Dashboard .Time {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 1.6em 0 rgba(150, 160, 200, 0.2);
+    margin-bottom: 20px;
+}
+
+/* ══════════════════════════════════════════════════════
+   Search bar: underline style
+   ══════════════════════════════════════════════════════ */
+.Dashboard .Search {
+    border-top: 1px solid rgba(150, 160, 200, 0.15);
+    padding-top: 20px;
+    margin-bottom: 20px;
+}
+
+.Dashboard .Search input {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(150, 160, 200, 0.3) !important;
+    border-radius: 0 !important;
+    color: white !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 0.95rem;
+    padding: 10px 4px !important;
+    width: 100%;
+}
+
+.Dashboard .Search input::placeholder {
+    color: rgba(150, 160, 200, 0.4);
+}
+
+/* ══════════════════════════════════════════════════════
+   GitHub Calendar
+   ══════════════════════════════════════════════════════ */
+.Dashboard .GitHub {
+    padding-top: 24px;
+    border-top: 1px solid rgba(150, 160, 200, 0.15);
+    border-bottom: 1px solid rgba(150, 160, 200, 0.15);
+    padding-bottom: 24px;
+    overflow-x: auto;
+    width: 750px !important;
+    position: relative;
+    left: 0;
+}
+
+.Dashboard .GitHub::before {
+    content: "qxprakash";
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.85);
+    letter-spacing: 0.05em;
+    background-image: url('https://github.com/qxprakash.png');
+    background-size: 28px 28px;
+    background-repeat: no-repeat;
+    background-position: left center;
+    padding-left: 38px;
+    min-height: 28px;
+}
+
+.Dashboard .GitHub::after {
+    content: '';
+    position: absolute;
+    top: 26px;
+    right: 50px;
+    width: 20px;
+    height: 20px;
+    background-image: url('https://cdn.simpleicons.org/github/c0c6d8');
+    background-size: 18px 18px;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.6;
+}
+
+.Dashboard .GitHub a[href*="contributions"] {
+    display: none;
+}
+
+.Dashboard .GitHub a[href*="year-list"],
+.Dashboard .GitHub a.skip-to-content,
+.Dashboard .GitHub a[class*="skip"] {
+    display: none !important;
+}
+
+/* ══════════════════════════════════════════════════════
+   Decorative vertical lines overlay
+   ══════════════════════════════════════════════════════ */
+.Dashboard::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(90deg,
+            transparent,
+            transparent 30px,
+            rgba(150, 160, 200, 0.03) 30px,
+            rgba(150, 160, 200, 0.03) 31px);
+    pointer-events: none;
+    z-index: 0;
+}
