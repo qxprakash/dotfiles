@@ -10,11 +10,11 @@ get_default_icon() {
     2) echo ":spotify:" ;;
     3) echo ":firefox:" ;;
     4) echo ":code:" ;;
-    5) echo ":claude:" ;;
-    6) echo ":discord:" ;;
-    7) echo ":slack:" ;;
+    5) echo ":iterm:" ;;
+    6) echo ":slack:" ;;
+    7) echo ":telegram:" ;;
     8) echo ":finder:" ;;
-    9) echo ":telegram:" ;;
+    9) echo ":claude:" ;;
     *) echo "•" ;;
   esac
 }

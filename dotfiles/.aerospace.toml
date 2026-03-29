@@ -7,7 +7,8 @@ start-at-login = true
 
 after-startup-command = [
     'exec-and-forget sketchybar',
-    'exec-and-forget borders active_color=0xff00ff00 inactive_color=0xff555555 width=8.0'
+    'exec-and-forget borders active_color=0xff00ff00 inactive_color=0xff555555 width=8.0',
+    'exec-and-forget ~/.config/sketchybar/plugins/media_stream.sh'
 ]
 
 # i3 doesn't have "normalizations" — disabled for i3 parity
@@ -94,6 +95,11 @@ exec-on-workspace-change = ['/bin/bash', '-c',
     if.app-id = 'company.thebrowser.Browser'
     run = 'move-node-to-workspace 3'
 
+# Antigravity → workspace 4
+[[on-window-detected]]
+    if.app-id = 'com.google.antigravity'
+    run = 'move-node-to-workspace 4'
+
 # Chat → Portrait monitor (workspace 6)
 [[on-window-detected]]
     if.app-id = 'com.tinyspeck.slackmacgap'
@@ -103,6 +109,20 @@ exec-on-workspace-change = ['/bin/bash', '-c',
     if.app-id = 'com.hnc.Discord'
     run = 'move-node-to-workspace 6'
 
+# cmux → workspace 5
+[[on-window-detected]]
+    if.app-id = 'com.cmuxterm.app'
+    run = 'move-node-to-workspace 5'
+
+# AI Assistants → workspace 9
+[[on-window-detected]]
+    if.app-id = 'com.anthropic.claudefordesktop'
+    run = 'move-node-to-workspace 9'
+
+[[on-window-detected]]
+    if.app-id = 'com.openai.chat'
+    run = 'move-node-to-workspace 9'
+
 # ── Key Mapping ──────────────────────────────────────────────────────
 [key-mapping]
     preset = 'qwerty'
@@ -111,12 +131,10 @@ exec-on-workspace-change = ['/bin/bash', '-c',
 [mode.main.binding]
 
     # Open terminal (i3: $mod+Return)
-    alt-enter = '''exec-and-forget osascript -e '
-    tell application "Terminal"
-        do script
-        activate
-    end tell'
-    '''
+    alt-enter = 'exec-and-forget open -a iTerm'
+    alt-shift-enter = 'exec-and-forget open -a cmux'
+    alt-shift-i = 'exec-and-forget open -a Antigravity'
+    alt-shift-o = 'exec-and-forget open -a "Google Chrome"'
 
     # ── Focus (i3 wraps by default) ──────────────────────────────────
     alt-j         = 'focus --boundaries-action wrap-around-the-workspace left'
