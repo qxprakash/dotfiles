@@ -1,5 +1,9 @@
 #!/bin/bash
 
+LOCK="/tmp/sketchybar-network.lock"
+mkdir "$LOCK" 2>/dev/null || exit 0
+trap 'rmdir "$LOCK"' EXIT
+
 INTERFACE="en0"
 CACHE_FILE="/tmp/sketchybar_net_${INTERFACE}"
 

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+LOCK="/tmp/sketchybar-ram.lock"
+mkdir "$LOCK" 2>/dev/null || exit 0
+trap 'rmdir "$LOCK"' EXIT
+
 PAGESIZE=$(sysctl -n hw.pagesize)
 VM=$(vm_stat)
 

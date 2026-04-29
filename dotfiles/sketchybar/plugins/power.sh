@@ -1,5 +1,9 @@
 #!/bin/bash
 
+LOCK="/tmp/sketchybar-power.lock"
+mkdir "$LOCK" 2>/dev/null || exit 0
+trap 'rmdir "$LOCK"' EXIT
+
 BATT_PERCENT=$(pmset -g batt | grep -Eo "\d+%" | cut -d% -f1)
 CHARGING=$(pmset -g batt | grep 'AC Power')
 
