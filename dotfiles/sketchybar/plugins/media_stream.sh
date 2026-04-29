@@ -1,7 +1,6 @@
 #!/bin/bash
 # Media widget for sketchybar.
-# Single polling loop — checks media-control and cliamp every 0.15s.
-# Simple, reliable, no background subprocesses.
+# Adaptive polling: 0.15s when playing (for animation), 1s when idle.
 
 # Prevent duplicate instances
 PIDFILE="/tmp/media_stream.pid"
@@ -40,13 +39,14 @@ while true; do
   artist=""
   playing="false"
 
-  # 1. Check system media (media-control) — every 2 seconds to avoid overhead
-  if (( frame % 13 == 0 )); then
+  # Check media-control: every iteration when idle, every 13th frame (~2s) when playing
+  if [ "$last_playing" != "true" ] || (( frame % 13 == 0 )); then
     mc_out=$(media-control get 2>/dev/null)
     if [ -n "$mc_out" ] && [ "$mc_out" != "null" ]; then
-      mc_title=$(echo "$mc_out" | sed 's/"artworkData":"[^"]*",//g' | jq -r '.title // empty' 2>/dev/null)
-      mc_artist=$(echo "$mc_out" | sed 's/"artworkData":"[^"]*",//g' | jq -r '.artist // empty' 2>/dev/null)
-      mc_playing=$(echo "$mc_out" | sed 's/"artworkData":"[^"]*",//g' | jq -r 'if .playing == true then "true" else "false" end' 2>/dev/null)
+      mc_clean=$(echo "$mc_out" | sed 's/"artworkData":"[^"]*",//g')
+      mc_title=$(echo "$mc_clean" | jq -r '.title // empty' 2>/dev/null)
+      mc_artist=$(echo "$mc_clean" | jq -r '.artist // empty' 2>/dev/null)
+      mc_playing=$(echo "$mc_clean" | jq -r 'if .playing == true then "true" else "false" end' 2>/dev/null)
       if [ -n "$mc_title" ]; then
         title="$mc_title"
         artist="$mc_artist"
@@ -54,13 +54,12 @@ while true; do
       fi
     fi
   else
-    # Reuse last known system media state between polls
     title="$last_title"
     artist="$last_artist"
     playing="$last_playing"
   fi
 
-  # 2. Check cliamp file (overrides system media if cliamp is running)
+  # Check cliamp file (overrides system media if cliamp is running)
   if [ -f "$CLIAMP_FILE" ] && pgrep -x cliamp >/dev/null 2>&1; then
     c_title=$(jq -r '.title // empty' "$CLIAMP_FILE" 2>/dev/null)
     c_status=$(jq -r '.status // empty' "$CLIAMP_FILE" 2>/dev/null)
@@ -75,7 +74,7 @@ while true; do
     rm -f "$CLIAMP_FILE"
   fi
 
-  # 3. Update sketchybar
+  # Update sketchybar
   if [ -z "$title" ]; then
     sketchybar --set media drawing=off 2>/dev/null
   else
@@ -98,7 +97,13 @@ while true; do
   last_title="$title"
   last_artist="$artist"
   last_playing="$playing"
-  frame=$((frame + 1))
 
-  sleep 0.15
+  # Adaptive sleep: fast when playing (for animation), slow when idle
+  if [ "$playing" = "true" ]; then
+    frame=$((frame + 1))
+    sleep 0.15
+  else
+    frame=0
+    sleep 1
+  fi
 done

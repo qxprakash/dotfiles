@@ -76,7 +76,7 @@ do
   fi
 
   sketchybar --add item space.$sid left \
-             --subscribe space.$sid aerospace_workspace_change front_app_switched mouse.entered mouse.exited \
+             --subscribe space.$sid aerospace_workspace_change front_app_switched \
              --set space.$sid \
                  icon.drawing=off \
                  label.font="sketchybar-app-font:Regular:14.0" \
