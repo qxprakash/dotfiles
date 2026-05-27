@@ -114,6 +114,11 @@ exec-on-workspace-change = ['/bin/bash', '-c',
     if.app-id = 'com.cmuxterm.app'
     run = 'move-node-to-workspace 5'
 
+# Notion → workspace 5
+[[on-window-detected]]
+    if.app-id = 'notion.id'
+    run = 'move-node-to-workspace 5'
+
 # AI Assistants → workspace 9
 [[on-window-detected]]
     if.app-id = 'com.anthropic.claudefordesktop'
