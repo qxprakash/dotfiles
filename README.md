@@ -68,6 +68,9 @@ cp dotfiles/ghostty/config ~/.config/ghostty/config
 # Fastfetch
 cp -r dotfiles/fastfetch ~/.config/fastfetch
 
+# Zed
+cp dotfiles/zed/settings.json ~/.config/zed/settings.json
+
 # Floorp / Firefox CSS
 cp dotfiles/firefox/userChrome.css ~/Library/Application\ Support/Floorp/Profiles/<your-profile>/chrome/userChrome.css
 
@@ -96,4 +99,5 @@ cp scripts/rice-*.sh /usr/local/bin/  # or anywhere in your $PATH
 | SketchyBar | `~/.config/sketchybar/` |
 | Ghostty | `~/.config/ghostty/config` |
 | Fastfetch | `~/.config/fastfetch/config.jsonc` |
+| Zed | `~/.config/zed/settings.json` |
 | Floorp CSS | `~/Library/Application Support/Floorp/Profiles/<profile>/chrome/userChrome.css` |
